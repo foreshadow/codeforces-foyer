@@ -1,0 +1,142 @@
+#leftside {
+    width: 73%;
+    padding-right: 2%;
+}
+
+#rightside {
+    position: fixed;
+    top: 80px;
+    left: 75%;
+    width: 300px;
+}
+
+div#vr {
+    position: fixed;
+    top: 0;
+    left: 73%;
+    width: 1px;
+    height: 100%;
+    background-color: #ddd;
+}
+
+div#header {
+    top: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: auto;
+    z-index: 1000;
+    margin: 0;
+    padding: 0 4% 0 8%;
+    background-color: white;
+}
+
+#title {
+    position: fixed;
+    left: 315px;
+    right: 4%;
+    z-index: 1030;
+    margin-left: 8%;
+    margin-bottom: 0.5em;
+    text-align: center;
+    font-size: 1.8rem;
+}
+
+#navigation {
+    padding-top: 40px;
+}
+
+.problem-navigation {
+    float: left;
+    margin-bottom: 6px;
+}
+
+.navigation-title {
+    float: left;
+    margin-left: 15px;
+}
+
+.navigation-passed {
+    float: left;
+}
+
+#time {
+    color: initial;
+    font-size: initial;
+    float: right;
+}
+
+#header hr {
+    position: fixed;
+    /*top: 70px;*/
+    width: 100%;
+    margin: 0;
+    left: 0;
+}
+
+hr {
+    border-color: #ccc;
+    border-style: solid;
+    border-width: 1px 0 0;
+}
+
+#submit {
+    width: 100%;
+}
+
+.pname {
+    font-weight: bold;
+    color: #337ab7;
+    margin: 15px 0 0 0;
+}
+
+.stime {
+    float: right;
+    font-size: small;
+    color: #888;
+}
+
+.header {
+    height: 75px;
+}
+
+.problem-statement .header div.title {
+    margin: 15px 0;
+}
+
+.problem-statement div.property-title {
+    display: block;
+}
+
+.problem-statement div.time-limit, .problem-statement div.memory-limit, .problem-statement div.input-file, .problem-statement div.output-file {
+    float: left;
+    width: 25%;
+}
+
+.problem-statement .unusual {
+    float: left;
+    width: 25%;
+    border-radius: 3px;
+    font-weight: bold;
+    background-color: #eee;
+}
+
+#leftbar {
+    position: fixed;
+    left: 0;
+    max-width: 7%;
+    margin-top: 80px;
+}
+
+#leftbar div {
+    margin: 9px 0;
+    padding: 6px;
+    font-weight: bold;
+    text-align: left;
+    cursor: pointer;
+}
+
+#leftbar div.primary {
+    border-radius: 0 10px 10px 0;
+    background-color: #ccc;
+}
