@@ -1,5 +1,6 @@
 foyer = new function() {
     var cid = location.href.match(/contest\/(.*)\/problems/)[1];
+    var handle;
     var codeforces = {
         rank_color_class: function(rating) {
             if (rating >= 2900) {
@@ -88,43 +89,46 @@ foyer = new function() {
     var fetch = {
         status: function() {
             $('#loading').fadeIn();
-            // $('.lang-chooser').children().first().next().find('a').first().html()
-            $.get('http://codeforces.com/api/user.status?handle=Infinity25&from=1&count=100', function(data) {
-                var lastpid;
-                var retry = false;
-                var st = '';
-                $.each(data.result, function(k, s) {
-                    if (s.problem.contestId == cid) {
-                        var pid = s.problem.index;
-                        if (pid != lastpid) {
+            if (typeof handle != 'undefined') {
+                $.get('http://codeforces.com/api/user.status?handle=' + handle + '&from=1&count=100', function(data) {
+                    var lastpid;
+                    var retry = false;
+                    var st = '';
+                    $.each(data.result, function(k, s) {
+                        if (s.problem.contestId == cid) {
+                            var pid = s.problem.index;
+                            if (pid != lastpid) {
+                                st +=
+                                    '<hr></div><div class="pname">' +
+                                    pid + '. ' + s.problem.name +
+                                    '</div>';
+                            }
                             st +=
-                                '<hr></div><div class="pname">' +
-                                pid + '. ' + s.problem.name +
-                                '</div>';
+                                '<div class="stime">' +
+                                stime(s.relativeTimeSeconds, s.creationTimeSeconds) +
+                                '</div>' +
+                                '<div class="' + codeforces.verdict_class(s.verdict) + '">' +
+                                codeforces.verdict(s.verdict, s.passedTestCount, s.testset) +
+                                '</div>'
+                                // timeConsumedMillis memoryConsumedBytes
+                            lastpid = pid;
                         }
-                        st +=
-                            '<div class="stime">' +
-                            stime(s.relativeTimeSeconds, s.creationTimeSeconds) +
-                            '</div>' +
-                            '<div class="' + codeforces.verdict_class(s.verdict) + '">' +
-                            codeforces.verdict(s.verdict, s.passedTestCount, s.testset) +
-                            '</div>'
-                            // timeConsumedMillis memoryConsumedBytes
-                        lastpid = pid;
-                    }
-                    if (!s.verdict || s.verdict == 'TESTING') {
-                        console.log('Retry');
-                        retry = true;
+                        if (!s.verdict || s.verdict == 'TESTING') {
+                            console.log('Retry');
+                            retry = true;
+                        }
+                    });
+                    $('#st').html(st);
+                    $('#loading').fadeOut();
+                    if (retry) {
+                        console.log('Retry set');
+                        setTimeout(this.status, 1000);
                     }
                 });
-                $('#st').html(st);
-                $('#loading').fadeOut();
-                if (retry) {
-                    console.log('Retry set');
-                    setTimeout(this.status, 1000);
-                }
-            });
-            setTimeout(fetch.status, 60 * 1000);
+                setTimeout(fetch.status, 60 * 1000);
+            } else {
+                setTimeout(fetch.status, 5 * 1000);
+            }
         },
         passed: function() {
             $.get('http://codeforces.com/contest/' + cid, function(data) {
@@ -207,8 +211,9 @@ foyer = new function() {
         });
         $.get('http://codeforces.com/contest/' + cid + '/submit', function(data) {
             var $submit = $('<div></div>').append(data);
+            handle = $submit.find('.lang-chooser').children().first().next().find('a').first().html();
             $submit.find('.second-level-menu').next().css('padding-bottom', 0);
-            $submit.find('form').prev().hide();
+            $submit.find('form').prev().html('Your handle: ' + handle);
             $submit.find('form.submit-form').attr('action',
                 'submit' + $submit.find('form.submit-form').attr('action')
             );
