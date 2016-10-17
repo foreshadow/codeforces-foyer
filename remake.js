@@ -151,11 +151,11 @@ foyer = new function() {
         },
         submit: function() {
             $.get('http://codeforces.com/contest/' + cid + '/submit', function(data) {
-                if (this.contentType.indexOf('form')) {
+                var $submit = $('<div></div>').append(data);
+                if ($submit.find('title').html().indexOf('Submit') == -1) {
                     $('#submit').html('<div style="text-align: center;">Submit unavailable.</div>');
                     return;
                 }
-                var $submit = $('<div></div>').append(data);
                 handle = $submit.find('.lang-chooser').children().first().next().find('a').first().html();
                 $submit.find('.second-level-menu').next().css('padding-bottom', 0);
                 $submit.find('form').prev().html('Your handle: ' + handle);
