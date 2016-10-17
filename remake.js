@@ -235,9 +235,10 @@ foyer = new function() {
             );
             $submit.find('#pageContent script').last().remove();
             $('.caption').html(
-                $('.caption').html() + ", " +
-                '<span id="contest-status">' + $submit.find('.contest-state-phase').html() + '</span>' +
-                '<span id="time"></span>'
+                $('.caption').html() +
+                '<span class="timer"><span id="contest-status">' + 
+                $submit.find('.contest-state-phase').html() + 
+                '</span> <span id="time"></span></span>'
             );
             $('#submit').append($submit.find('#pageContent').html());
             console.log('hahahaha!');

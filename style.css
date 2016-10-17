@@ -60,10 +60,13 @@ div#header {
     float: left;
 }
 
-#time {
-    color: initial;
+.timer {
     font-size: initial;
     float: right;
+}
+
+#time{
+    color: #777;
 }
 
 #header hr {
