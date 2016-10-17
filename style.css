@@ -1,3 +1,9 @@
+.inline {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 #leftside {
     width: 73%;
     padding-right: 2%;
@@ -53,6 +59,7 @@ div#header {
 
 .navigation-title {
     float: left;
+    max-width: 112px;
     margin-left: 15px;
 }
 
@@ -142,4 +149,8 @@ hr {
 #leftbar div.primary {
     border-radius: 0 10px 10px 0;
     background-color: #ccc;
+}
+
+.page {
+    margin-top: 50px;
 }

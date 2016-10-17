@@ -138,15 +138,91 @@ foyer = new function() {
                     var passed = $(this).html().replace(/.*&nbsp;x/, '');
                     $('#passed-' + pid).html('(' + passed + ')');
                 });
+                $('.page#overview').html($html.find('#pageContent'));
+                $('.page#overview').children().attr('class', '');
+                $html.find('.second-level-menu').hide();
+                $('#contest-status').html($html.find('.contest-state-phase').html());
             });
-            setTimeout(fetch.passed, 5 * 1000);
+            if ($('#nav-overview').attr('class') == 'primary') {
+                setTimeout(fetch.passed, 1000);
+            } else {
+                setTimeout(fetch.passed, 5000);
+            } 
+        },
+        submit: function() {
+            $.get('http://codeforces.com/contest/' + cid + '/submit', function(data) {
+                if (this.contentType.indexOf('form')) {
+                    $('#submit').html('<div style="text-align: center;">Submit unavailable.</div>');
+                    return;
+                }
+                var $submit = $('<div></div>').append(data);
+                handle = $submit.find('.lang-chooser').children().first().next().find('a').first().html();
+                $submit.find('.second-level-menu').next().css('padding-bottom', 0);
+                $submit.find('form').prev().html('Your handle: ' + handle);
+                $submit.find('form.submit-form').attr('action',
+                    'submit' + $submit.find('form.submit-form').attr('action')
+                );
+                $submit.find('div.second-level-menu').hide();
+                $submit.find('td.field-name').hide();
+                $submit.find('tr.subscription-row td').first().hide();
+                $submit.find('#editor').css('height', 60);
+                $submit.find('textarea#sourceCodeTextarea').css('height', 60);
+                $submit.find('td.aceEditorTd input').hide();
+                $submit.find('td.aceEditorTd label').hide();
+                $submit.find("td:contains('Be careful')").children().css('height', 30);
+                $submit.find("td:contains('Be careful')").children().css('overflow-y', 'scroll');
+                $submit.find('td[colspan=2]').attr('colspan', 1);
+                $submit.find('#pageContent script').first().remove();
+                $submit.find('#pageContent script').first().html(
+                    $submit.find('#pageContent script').first().html()
+                    .replace(/\n/g, '')
+                    .replace(/function updateProblemLockInfo.*/, '});')
+                );
+                $submit.find('#pageContent script').last().remove();
+                // $('#contest-status').html($submit.find('.contest-state-phase').html());
+                $('#submit').append($submit.find('#pageContent').html());
+                console.log('hahahaha!');
+                $('#submit').append(
+                    "<script>$('textarea#sourceCodeTextarea').show();$('#editor').hide();$('div.tabSizeDiv').hide();</script>"
+                );
+                $('form.submit-form').submit(function() {
+                    console.log('Override');
+                    var form = $('form.submit-form');
+                    $.ajax({
+                        type: form.attr('method'),
+                        url: form.attr('action'),
+                        data: form.serialize()
+                    }).success(function() {
+                        console.log('Success');
+                        $('textarea').val('// submit success');
+                        fetch_status(cid);
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+                        console.log('Failed');
+                        console.log(textStatus);
+                    });
+                    $('textarea').val('// submit sent');
+                    return false;
+                });
+            });
+        },
+        list: function() {
+            $.get('http://codeforces.com/api/contest.list', function(data) {
+                $.each(data.result, function(k, c) {
+                    if (c.id == cid) {
+                        cst = c.startTimeSeconds;
+                        cdt = c.durationSeconds;
+                        console.log('Start: ' + cst);
+                        console.log('Duration: ' + cdt);
+                    }
+                });
+            });
         }
     };
     var timer = function() {
         var now = Date.parse(new Date()) / 1000;
         var display;
-        if ($('#contest-status').html() == 'Finished' ||
-            typeof cst == "undefined" || typeof cdt == "undefined") {
+        if (typeof cst == "undefined" || typeof cdt == "undefined" || 
+            $('#contest-status').html() == 'Finished' || now > cst + cdt ) {
             display = stime(2147483647, now);
         } else {
             display = stime(cst + cdt - now, now);
@@ -154,27 +230,58 @@ foyer = new function() {
         $('#time').html(display);
         setTimeout(timer, 1000);
     };
+    var page = {
+        standing: function() {
+            $.get('http://codeforces.com/contest/' + cid + '/standings/friends/true', function(data) {
+                var $standings = $('<div></div>').append(data);
+                $standings.find('a').attr('href', '#');
+                $standings.find('div.second-level-menu').hide();
+                $standings.find('.contest-status').parent().next().hide();
+                $standings.find('.contest-status').parent().hide();
+                $('#friends').html($standings.find('#pageContent'));
+            });
+            if ($('#nav-friends').attr('class') == 'primary') {
+                setTimeout(page.standing, 1000);
+            } else {
+                setTimeout(page.standing, 5000);
+            }
+        }
+    };
+    var lastpid = 'A';
+
+    var add_page = function(title) {
+        var id = title.toLowerCase().replace(/[^\w]/g, "-");
+        $('#leftside').prepend('<div id="' + id + '" class="page"></div>');
+        $('.page#' + id).hide();
+        $('#leftbar').append('<div id="nav-' + id + '">' + title + '</div>');
+        $('#nav-' + id).click(function() {
+            $('.page#' + id).show();
+            $(".page[id!='" + id + "']").hide();
+        });
+        return id;
+    };
+
+    var add_navigation = function(id, title) {
+        $('#leftbar').append('<div id="nav-' + id + '">' + title + '</div>');
+        $('#nav-' + id).click(function() {
+            $('.page#' + id).show();
+            $(".page[id!='" + id + "']").hide();
+        });
+    }
 
     this.remake = function() {
         $('.lang').hide();
         $('#body').children().attr('style', '');
         $('#body').children().attr('id', 'leftside');
         $('#body').children().after('<div id="vr"></div><div id="rightside"></div>');
-        //$('#body').prepend('<div id="leftbar"></div>');
-        //$('#leftbar').append('<div id="prob" class="primary">Problems</div>');
-        //$('#leftbar').append('<div id="hack">Hacks</div>');
-        //$('#leftbar').append('<div id="room">Room</div>');
-        //$('#leftbar').append('<div id="rank">Standings</div>');
-        //$('#leftbar').append('<div id="cust">Custom Invocation</div>');
-        $('#leftbar div').click(function() {
-            $(this).attr('class', 'primary');
-            $('#leftbar div[id!="' + $(this).attr('id') + '"]').attr('class', '');
-        });
+        $('#body').prepend('<div id="leftbar"></div>');
         $('#header').css('position', 'fixed');
         $('#header').next().attr('id', 'title');
         $('#header').children().first().after('<div id="navigation"></div>');
         $('#header').append('<hr>');
         $('#title').css('text-align', 'left');
+        $('#title').css('top', '15px');
+        $('.caption').append('<span class="timer"><span id="contest-status"></span> <span id="time"></span></span>');
         $('#rightside').append('<div id="submit"></div>');
         $('#submit').after('<ul id="status"></ul>');
         $('#status').append(
@@ -182,7 +289,9 @@ foyer = new function() {
             '<div id="loading" style="text-align: center;"><hr>Updating status ...</div>' +
             '<div id="st"></div>'
         );
-        $(".problemindexholder[problemindex!='A']").parent().fadeOut();
+        $(".problemindexholder").parent().attr('class', 'page');
+        
+        add_page('Overview');
         $.each($('.problemindexholder'), function(k, v) {
             if ($(this).find('.time-limit').html().replace(/.*?<\/div>/, '') != '1 second') {
                 $(this).find('.time-limit').attr('class', 'unusual');
@@ -196,84 +305,36 @@ foyer = new function() {
             if ($(this).find('.output-file').html().replace(/.*?<\/div>/, '') != 'standard output') {
                 $(this).find('.output-file').attr('class', 'unusual');
             }
-            $(this).parent().css('margin-top', 80);
             var pid = $(this).attr('problemindex');
+            $(this).parent().css('margin-top', 80);
+            $(this).parent().attr('id', pid);
             var title = $(".problemindexholder[problemindex='" + pid + "'] .title").html();
             $('#navigation').append(
                 '<div class="problem-navigation">' +
-                '<div class="navigation-title"><a id="problem-' + pid + '" href="#">' + title + '</a></div>' +
+                '<div class="navigation-title inline"><a id="problem-' + pid + '" href="#">' + title + '</a></div>' +
                 '<div id="passed-' + pid + '" class="navigation-passed"></div></div>'
             );
+            add_navigation(pid, 'Prob. ' + pid);
             $('#problem-' + pid).click(function() {
-                $(".problemindexholder[problemindex='" + pid + "']").parent().show();
-                $(".problemindexholder[problemindex!='" + pid + "']").parent().hide();
+                $(".page[id='" + pid + "']").show();
+                $(".page[id!='" + pid + "']").hide();
             });
         });
-        $.get('http://codeforces.com/contest/' + cid + '/submit', function(data) {
-            var $submit = $('<div></div>').append(data);
-            handle = $submit.find('.lang-chooser').children().first().next().find('a').first().html();
-            $submit.find('.second-level-menu').next().css('padding-bottom', 0);
-            $submit.find('form').prev().html('Your handle: ' + handle);
-            $submit.find('form.submit-form').attr('action',
-                'submit' + $submit.find('form.submit-form').attr('action')
-            );
-            $submit.find('div.second-level-menu').hide();
-            $submit.find('td.field-name').hide();
-            $submit.find('tr.subscription-row td').first().hide();
-            $submit.find('#editor').css('height', 60);
-            $submit.find('textarea#sourceCodeTextarea').css('height', 60);
-            $submit.find('td.aceEditorTd input').hide();
-            $submit.find('td.aceEditorTd label').hide();
-            $submit.find("td:contains('Be careful')").children().css('height', 30);
-            $submit.find("td:contains('Be careful')").children().css('overflow-y', 'scroll');
-            $submit.find('td[colspan=2]').attr('colspan', 1);
-            $submit.find('#pageContent script').first().remove();
-            $submit.find('#pageContent script').first().html(
-                $submit.find('#pageContent script').first().html()
-                .replace(/\n/g, '')
-                .replace(/function updateProblemLockInfo.*/, '});')
-            );
-            $submit.find('#pageContent script').last().remove();
-            $('.caption').html(
-                $('.caption').html() +
-                '<span class="timer"><span id="contest-status">' + 
-                $submit.find('.contest-state-phase').html() + 
-                '</span> <span id="time"></span></span>'
-            );
-            $('#submit').append($submit.find('#pageContent').html());
-            console.log('hahahaha!');
-            $('#submit').append(
-                "<script>$('textarea#sourceCodeTextarea').show();$('#editor').hide();$('div.tabSizeDiv').hide();</script>"
-            );
-            $('form.submit-form').submit(function() {
-                console.log('Override');
-                var form = $('form.submit-form');
-                $.ajax({
-                    type: form.attr('method'),
-                    url: form.attr('action'),
-                    data: form.serialize()
-                }).success(function() {
-                    console.log('Success');
-                    $('textarea').val('// submit success');
-                    fetch_status(cid);
-                }).fail(function(jqXHR, textStatus, errorThrown) {
-                    console.log('Failed');
-                    console.log(textStatus);
-                });
-                $('textarea').val('// submit sent');
-                return false;
-            });
+        add_page('Hacks');
+        add_page('Room');
+        add_page('Friends');
+        add_page('Custom Invocation');
+
+        $('#leftbar div').click(function() {
+            $(this).attr('class', 'primary');
+            $('#leftbar div[id!="' + $(this).attr('id') + '"]').attr('class', '');
         });
-        $.get('http://codeforces.com/api/contest.list', function(data) {
-            $.each(data.result, function(k, c) {
-                if (c.id == cid) {
-                    cst = c.startTimeSeconds;
-                    cdt = c.durationSeconds;
-                    console.log('Start: ' + cst);
-                    console.log('Duration: ' + cdt);
-                }
-            });
-        });
+        $('#nav-A').click();
+
+        fetch.list();
+        fetch.submit();
+        // roll update
+        page.standing();
         fetch.status();
         fetch.passed();
         timer();
