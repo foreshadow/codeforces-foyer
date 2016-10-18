@@ -1,6 +1,6 @@
 foyer = new function() {
     var cid = location.href.match(/contest\/(.*)\/problems/)[1];
-    var handle;
+    var handle, cst, cdt;
     var codeforces = {
         rank_color_class: function(rating) {
             if (rating >= 2900) {
@@ -30,6 +30,10 @@ foyer = new function() {
                 return '';
             } else if (verdict == 'CHALLENGED') {
                 return 'verdict-failed';
+            } else if (verdict == 'HACK_SUCCESSFUL') {
+                return 'verdict-successful-challenge';
+            } else if (verdict == 'HACK_UNSUCCESSFUL') {
+                return 'verdict-unsuccessful-challenge';
             } else if (verdict == 'OK') {
                 return 'verdict-accepted';
             } else {
@@ -43,6 +47,10 @@ foyer = new function() {
                 } else {
                     return 'In queue';
                 }
+            } else if (verdict == 'HACK_SUCCESSFUL') {
+                return 'Successful hacking attempt';
+            } else if (verdict == 'HACK_UNSUCCESSFUL') {
+                return 'Unsuccessful hacking attempt';
             } else if (verdict == 'TESTING') {
                 return 'Running';
             } else if (verdict == 'CHALLENGED') {
@@ -56,9 +64,14 @@ foyer = new function() {
                     return 'Accepted';
                 }
             } else {
-                return verdict.replace(/_/g, ' ').toLowerCase()
-                    .replace(/\b[a-z]/g, l => l.toUpperCase()) +
-                    ' on test ' + (testcase + 1);
+                if (typeof testcase != 'undefined') {
+                    return verdict.replace(/_/g, ' ').toLowerCase()
+                        .replace(/\b[a-z]/g, l => l.toUpperCase()) +
+                        ' on test ' + (testcase + 1);
+                } else {
+                    return verdict.replace(/_/g, ' ').toLowerCase()
+                        .replace(/\b[a-z]/g, l => l.toUpperCase());
+                }
             }
         }
     };
@@ -125,9 +138,9 @@ foyer = new function() {
                         setTimeout(this.status, 1000);
                     }
                 });
-                setTimeout(fetch.status, 60 * 1000);
+                setTimeout(fetch.status, 60000);
             } else {
-                setTimeout(fetch.status, 5 * 1000);
+                setTimeout(fetch.status, 5000);
             }
         },
         passed: function() {
@@ -140,6 +153,7 @@ foyer = new function() {
                 });
                 $('.page#overview').html($html.find('#pageContent'));
                 $('.page#overview').children().attr('class', '');
+                $html.find('a').attr('href', '#');
                 $html.find('.second-level-menu').hide();
                 $('#contest-status').html($html.find('.contest-state-phase').html());
             });
@@ -222,7 +236,7 @@ foyer = new function() {
         var now = Date.parse(new Date()) / 1000;
         var display;
         if (typeof cst == "undefined" || typeof cdt == "undefined" || 
-            $('#contest-status').html() == 'Finished' || now > cst + cdt ) {
+            now >= cst + cdt || $('#contest-status').html() == 'Finished') {
             display = stime(2147483647, now);
         } else {
             display = stime(cst + cdt - now, now);
@@ -231,24 +245,57 @@ foyer = new function() {
         setTimeout(timer, 1000);
     };
     var page = {
-        standing: function() {
+        friends: function() {
             $.get('http://codeforces.com/contest/' + cid + '/standings/friends/true', function(data) {
                 var $standings = $('<div></div>').append(data);
                 $standings.find('a').attr('href', '#');
+                $standings.find('form').hide(); // hide 'show unofficial'
                 $standings.find('div.second-level-menu').hide();
                 $standings.find('.contest-status').parent().next().hide();
                 $standings.find('.contest-status').parent().hide();
                 $('#friends').html($standings.find('#pageContent'));
             });
             if ($('#nav-friends').attr('class') == 'primary') {
-                setTimeout(page.standing, 1000);
+                setTimeout(page.friends, 1000);
             } else {
-                setTimeout(page.standing, 5000);
+                setTimeout(page.friends, 5000);
+            }
+        },
+        hacks: function() {
+            $.get('http://codeforces.com/api/contest.hacks?contestId=' + cid, function(data) {
+                var html = '</tbody></table>';
+                $.each(data.result, function(k, v) {
+                    var line = '<tr>'+ '<td>' + this.id + '</td>';
+                    if (typeof cst != 'undefined') {
+                        line += '<td>' + stime(this.creationTimeSeconds - cst, this.creationTimeSeconds) + '</td>' 
+                    } else {
+                        line += '<td>' + stime(2147483647, this.creationTimeSeconds) + '</td>'
+                    }
+                    line +=
+                        '<td style="max-width: 120px;" class="inline">' + this.hacker.members[0].handle + '</td>' +
+                        '<td style="max-width: 120px;" class="inline">' + this.defender.members[0].handle + '</td>' +
+                        '<td style="max-width: 240px;" class="inline">' + this.problem.index + '. ' +  this.problem.name + '</td>' +
+                        '<td class="' + codeforces.verdict_class(this.verdict) + '">' + codeforces.verdict(this.verdict) + '</td>' + 
+                        '</tr>';
+                    html = line + html;
+                });
+                html = '<table class="table table-hover table-striped table-condensed"><thead><tr>' + 
+                    '<th>#</th>' +
+                    '<th>When</th>' + 
+                    '<th style="max-width: 120px;">Hacker</th>' + 
+                    '<th style="max-width: 120px;">Defender</th>' + 
+                    '<th style="max-width: 240px;">Problem</th>' + 
+                    '<th>Verdict</th>' +  
+                    '</tr></thead><tbody>' + html;
+                $('#hacks').html(html);
+            });
+            if ($('#nav-hacks').attr('class') == 'primary') {
+                setTimeout(page.hacks, 1000);
+            } else {
+                setTimeout(page.hacks, 5000);
             }
         }
     };
-    var lastpid = 'A';
-
     var add_page = function(title) {
         var id = title.toLowerCase().replace(/[^\w]/g, "-");
         $('#leftside').prepend('<div id="' + id + '" class="page"></div>');
@@ -260,7 +307,6 @@ foyer = new function() {
         });
         return id;
     };
-
     var add_navigation = function(id, title) {
         $('#leftbar').append('<div id="nav-' + id + '">' + title + '</div>');
         $('#nav-' + id).click(function() {
@@ -282,6 +328,7 @@ foyer = new function() {
         $('#title').css('text-align', 'left');
         $('#title').css('top', '15px');
         $('.caption').append('<span class="timer"><span id="contest-status"></span> <span id="time"></span></span>');
+        $('.caption').next().remove();
         $('#rightside').append('<div id="submit"></div>');
         $('#submit').after('<ul id="status"></ul>');
         $('#status').append(
@@ -306,7 +353,6 @@ foyer = new function() {
                 $(this).find('.output-file').attr('class', 'unusual');
             }
             var pid = $(this).attr('problemindex');
-            $(this).parent().css('margin-top', 80);
             $(this).parent().attr('id', pid);
             var title = $(".problemindexholder[problemindex='" + pid + "'] .title").html();
             $('#navigation').append(
@@ -334,7 +380,8 @@ foyer = new function() {
         fetch.list();
         fetch.submit();
         // roll update
-        page.standing();
+        page.hacks();
+        page.friends();
         fetch.status();
         fetch.passed();
         timer();

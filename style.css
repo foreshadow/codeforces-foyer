@@ -15,7 +15,7 @@ div#body {
 
 #rightside {
     position: fixed;
-    top: 80px;
+    top: 64px;
     left: 75%;
     width: 300px;
 }
@@ -115,6 +115,7 @@ hr {
 }
 
 .problem-statement .header div.title {
+    padding: 9px 0;
     margin: 15px 0;
 }
 
@@ -139,7 +140,7 @@ hr {
     position: fixed;
     left: 0;
     max-width: 7%;
-    margin-top: 80px;
+    margin-top: 65px;
 }
 
 #leftbar div {
@@ -156,5 +157,9 @@ hr {
 }
 
 .page {
-    margin-top: 50px;
+    margin-top: 70px;
+}
+
+table.table thead tr th {
+    font-weight: bold;
 }
