@@ -57,6 +57,8 @@ foyer = new function() {
                 return 'Hacked';
             } else if (verdict == 'SKIPPED') {
                 return 'Skipped';
+            } else if (verdict == "COMPILATION_ERROR") {
+                return 'Compilation Error';
             } else if (verdict == 'OK') {
                 if (testset == 'PRETESTS') {
                     return 'Pretest passed';
@@ -112,7 +114,7 @@ foyer = new function() {
                             var pid = s.problem.index;
                             if (pid != lastpid) {
                                 st +=
-                                    '<hr></div><div class="pname">' +
+                                    '<hr></div><div class="pname inline">' +
                                     pid + '. ' + s.problem.name +
                                     '</div>';
                             }
@@ -151,9 +153,12 @@ foyer = new function() {
                     var passed = $(this).html().replace(/.*&nbsp;x/, '');
                     $('#passed-' + pid).html('(' + passed + ')');
                 });
+                $html.find('a').attr('href', '#');
+                // $.each($html.find('a'), function(k, v){
+                    // $(this).attr('href', '#');
+                // });
                 $('.page#overview').html($html.find('#pageContent'));
                 $('.page#overview').children().attr('class', '');
-                $html.find('a').attr('href', '#');
                 $html.find('.second-level-menu').hide();
                 $('#contest-status').html($html.find('.contest-state-phase').html());
             });
@@ -327,7 +332,9 @@ foyer = new function() {
         $('#header').append('<hr>');
         $('#title').css('text-align', 'left');
         $('#title').css('top', '15px');
-        $('.caption').append('<span class="timer"><span id="contest-status"></span> <span id="time"></span></span>');
+        $('.caption').html(
+            '<span class="timer">&nbsp;&nbsp;<span id="contest-status"></span>&nbsp;&nbsp;<span id="time"></span></span><div class="inline">' + $('.caption').html() + '</div>'
+        );
         $('.caption').next().remove();
         $('#rightside').append('<div id="submit"></div>');
         $('#submit').after('<ul id="status"></ul>');
@@ -341,16 +348,16 @@ foyer = new function() {
         add_page('Overview');
         $.each($('.problemindexholder'), function(k, v) {
             if ($(this).find('.time-limit').html().replace(/.*?<\/div>/, '') != '1 second') {
-                $(this).find('.time-limit').attr('class', 'unusual');
+                $(this).find('.time-limit').attr('class', 'time-limit unusual');
             }
             if ($(this).find('.memory-limit').html().replace(/.*?<\/div>/, '') != '256 megabytes') {
-                $(this).find('.memory-limit').attr('class', 'unusual');
+                $(this).find('.memory-limit').attr('class', 'memory-limit unusual');
             }
             if ($(this).find('.input-file').html().replace(/.*?<\/div>/, '') != 'standard input') {
-                $(this).find('.input-file').attr('class', 'unusual');
+                $(this).find('.input-file').attr('class', 'input-file unusual');
             }
             if ($(this).find('.output-file').html().replace(/.*?<\/div>/, '') != 'standard output') {
-                $(this).find('.output-file').attr('class', 'unusual');
+                $(this).find('.output-file').attr('class', 'output-file unusual');
             }
             var pid = $(this).attr('problemindex');
             $(this).parent().attr('id', pid);

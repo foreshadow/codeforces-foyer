@@ -4,6 +4,10 @@
     text-overflow: ellipsis;
 }
 
+body {
+    overflow-y: scroll;
+}
+
 div#body {
     max-width: none;
 }
@@ -72,11 +76,11 @@ div#header {
 }
 
 .timer {
-    font-size: initial;
     float: right;
 }
 
-#time{
+#time {
+    font-size: initial;
     color: #777;
 }
 
@@ -125,15 +129,18 @@ hr {
 
 .problem-statement div.time-limit, .problem-statement div.memory-limit, .problem-statement div.input-file, .problem-statement div.output-file {
     float: left;
-    width: 25%;
+    width: 23%;
+    margin: 0 1% 1em 1%;
 }
 
 .problem-statement .unusual {
-    float: left;
-    width: 25%;
-    border-radius: 3px;
+    /*border-radius: 3px;*/
+    /*background-color: #eee;*/
     font-weight: bold;
-    background-color: #eee;
+}
+
+.problem-statement .property-title {
+    text-transform: capitalize;
 }
 
 #leftbar {
