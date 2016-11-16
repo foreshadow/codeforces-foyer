@@ -103,6 +103,7 @@ foyer = new function() {
     };
     var fetch = {
         status: function() {
+            $('#st-title').css('cursor', 'wait');
             $('#loading').fadeIn();
             if (typeof handle != 'undefined') {
                 $.get('http://codeforces.com/api/user.status?handle=' + handle + '&from=1&count=100', function(data) {
@@ -115,17 +116,19 @@ foyer = new function() {
                             if (pid != lastpid) {
                                 st +=
                                     '<hr></div><div class="pname inline">' +
-                                    pid + '. ' + s.problem.name +
+                                        pid + '. ' + s.problem.name +
                                     '</div>';
                             }
                             st +=
-                                '<div class="stime">' +
-                                stime(s.relativeTimeSeconds, s.creationTimeSeconds) +
-                                '</div>' +
-                                '<div class="' + codeforces.verdict_class(s.verdict) + '">' +
-                                codeforces.verdict(s.verdict, s.passedTestCount, s.testset) +
+                                '<div class="verdict ' + codeforces.verdict_class(s.verdict) + '">' +
+                                    codeforces.verdict(s.verdict, s.passedTestCount, s.testset) +
+                                    '<div class="stime">' + stime(s.relativeTimeSeconds, s.creationTimeSeconds) + '</div>' +
+                                '</div>' + 
+                                '<div class="verdict-detail gray" style="display: none;">' +
+                                    '<div style="width: 25%; float: left;">' + s.timeConsumedMillis + 'ms' + '</div>' +
+                                    '<div style="width: 30%; float: left;">' + s.memoryConsumedBytes / 1024 + 'KB' + '</div>' +
+                                    '<div style="width: 45%; float: left; text-align: right;">' + s.programmingLanguage + '</div>' +  
                                 '</div>'
-                                // timeConsumedMillis memoryConsumedBytes
                             lastpid = pid;
                         }
                         if (!s.verdict || s.verdict == 'TESTING') {
@@ -134,15 +137,21 @@ foyer = new function() {
                         }
                     });
                     $('#st').html(st);
+                    $('#st .verdict').hover(function() {
+                        $(this).next().css('display', 'flex');
+                    }, function() {
+                        $(this).next().fadeOut();
+                    });
+                    $('#st-title').css('cursor', 'default');
                     $('#loading').fadeOut();
                     if (retry) {
                         console.log('Retry set');
-                        setTimeout(this.status, 1000);
+                        setTimeout(fetch.status, 1000);
                     }
                 });
-                setTimeout(fetch.status, 60000);
-            } else {
                 setTimeout(fetch.status, 5000);
+            } else {
+                setTimeout(fetch.status, 3000);
             }
         },
         passed: function() {
@@ -154,9 +163,6 @@ foyer = new function() {
                     $('#passed-' + pid).html('(' + passed + ')');
                 });
                 $html.find('a').attr('href', '#');
-                // $.each($html.find('a'), function(k, v){
-                    // $(this).attr('href', '#');
-                // });
                 $('.page#overview').html($html.find('#pageContent'));
                 $('.page#overview').children().attr('class', '');
                 $html.find('.second-level-menu').hide();
@@ -214,7 +220,7 @@ foyer = new function() {
                     }).success(function() {
                         console.log('Success');
                         $('textarea').val('// submit success');
-                        fetch_status(cid);
+                        fetch.status(cid);
                     }).fail(function(jqXHR, textStatus, errorThrown) {
                         console.log('Failed');
                         console.log(textStatus);
@@ -333,15 +339,17 @@ foyer = new function() {
         $('#title').css('text-align', 'left');
         $('#title').css('top', '15px');
         $('.caption').html(
-            '<span class="timer">&nbsp;&nbsp;<span id="contest-status"></span>&nbsp;&nbsp;<span id="time"></span></span><div class="inline">' + $('.caption').html() + '</div>'
+            '<span class="timer">&nbsp;&nbsp;<span id="contest-status"></span>&nbsp;&nbsp;<span id="time"></span></span>' + 
+            '<div class="inline">' + $('.caption').html() + '</div>'
         );
         $('.caption').next().remove();
         $('#rightside').append('<div id="submit"></div>');
         $('#submit').after('<ul id="status"></ul>');
         $('#status').append(
             '<link href="http://st.codeforces.com/s/19764/css/status.css" rel="stylesheet">' +
-            '<div id="loading" style="text-align: center;"><hr>Updating status ...</div>' +
-            '<div id="st"></div>'
+            '<div id="st-title" style="text-align: center; font-weight: bold; cursor: default;">' +
+            '<hr>My Submissions<span id="loading"> (Refreshing)</span></div>' +
+            '<div id="st" style="cursor: default;"></div>'
         );
         $(".problemindexholder").parent().attr('class', 'page');
         
@@ -369,8 +377,10 @@ foyer = new function() {
             );
             add_navigation(pid, 'Prob. ' + pid);
             $('#problem-' + pid).click(function() {
-                $(".page[id='" + pid + "']").show();
-                $(".page[id!='" + pid + "']").hide();
+                // $(".page[id='" + pid + "']").show();
+                // $(".page[id!='" + pid + "']").hide();
+                // redirect
+                $('#nav-' + pid).click();
             });
         });
         add_page('Hacks');
