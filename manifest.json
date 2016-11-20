@@ -1,7 +1,7 @@
 {
     "name": "Codeforces contest foyer (Unofficial)",
     "description": "Complete a codeforces contest in one page",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "permissions": [],
     "content_scripts": [{
         "matches": ["http://codeforces.com/contest/*/problems"],

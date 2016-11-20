@@ -19,7 +19,7 @@ div#body {
 
 #rightside {
     position: fixed;
-    top: 64px;
+    top: 84px;
     left: 75%;
     width: 300px;
 }
@@ -67,7 +67,7 @@ div#header {
 
 .navigation-title {
     float: left;
-    max-width: 112px;
+    max-width: 240px;
     margin-left: 15px;
 }
 
@@ -156,7 +156,7 @@ hr {
     position: fixed;
     left: 0;
     max-width: 7%;
-    margin-top: 65px;
+    margin-top: 85px;
 }
 
 #leftbar div {
@@ -173,7 +173,7 @@ hr {
 }
 
 .page {
-    margin-top: 70px;
+    margin-top: 90px;
 }
 
 table.table thead tr th {

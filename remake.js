@@ -33,7 +33,8 @@ foyer = new function() {
             } else if (verdict == 'HACK_SUCCESSFUL') {
                 return 'verdict-successful-challenge';
             } else if (verdict == 'HACK_UNSUCCESSFUL') {
-                return 'verdict-unsuccessful-challenge';
+                // return 'verdict-unsuccessful-challenge';
+                return 'verdict-failed';
             } else if (verdict == 'OK') {
                 return 'verdict-accepted';
             } else {
@@ -84,8 +85,7 @@ foyer = new function() {
         var time = '';
         if (relative == 2147483647 * 1000) {
             // time = (date.getYear() + 1900) + '/' +
-            time = (date.getMonth() + 1) + '/' +
-                (date.getDate()) + '&nbsp;';
+            time = (date.getMonth() + 1) + '/' + (date.getDate()) + '&nbsp;';
         } else {
             date = new Date(relative + date.getTimezoneOffset() * 60 * 1000);
         }
@@ -114,17 +114,16 @@ foyer = new function() {
                         if (s.problem.contestId == cid) {
                             var pid = s.problem.index;
                             if (pid != lastpid) {
-                                st +=
-                                    '<hr></div><div class="pname inline">' +
-                                        pid + '. ' + s.problem.name +
-                                    '</div>';
+                                st += '<hr></div><div class="pname inline">' + pid + '. ' + s.problem.name + '</div>';
                             }
                             st +=
                                 '<div class="verdict ' + codeforces.verdict_class(s.verdict) + '">' +
-                                    codeforces.verdict(s.verdict, s.passedTestCount, s.testset) +
+                                    '<span>' +  
+                                        codeforces.verdict(s.verdict, s.passedTestCount, s.testset) +
+                                    '</span>' + 
                                     '<div class="stime">' + stime(s.relativeTimeSeconds, s.creationTimeSeconds) + '</div>' +
                                 '</div>' + 
-                                '<div class="verdict-detail gray" style="display: none;">' +
+                                '<div class="verdict-detail gray" style="display: flex;">' +
                                     '<div style="width: 25%; float: left;">' + s.timeConsumedMillis + 'ms' + '</div>' +
                                     '<div style="width: 30%; float: left;">' + s.memoryConsumedBytes / 1024 + 'KB' + '</div>' +
                                     '<div style="width: 45%; float: left; text-align: right;">' + s.programmingLanguage + '</div>' +  
@@ -136,22 +135,24 @@ foyer = new function() {
                             retry = true;
                         }
                     });
+                    st += '<hr>';
                     $('#st').html(st);
-                    $('#st .verdict').hover(function() {
-                        $(this).next().css('display', 'flex');
-                    }, function() {
-                        $(this).next().fadeOut();
-                    });
+                    // $('#st .verdict').hover(function() {
+                    //     $(this).next().css('display', 'flex');
+                    // }, function() {
+                    //     $(this).next().fadeOut();
+                    // });
                     $('#st-title').css('cursor', 'default');
                     $('#loading').fadeOut();
                     if (retry) {
                         console.log('Retry set');
                         setTimeout(fetch.status, 1000);
                     }
+                }).fail(function() {
+                    setTimeout(fetch.status, 30000);
                 });
-                setTimeout(fetch.status, 5000);
             } else {
-                setTimeout(fetch.status, 3000);
+                setTimeout(fetch.status, 5000);
             }
         },
         passed: function() {
@@ -377,14 +378,14 @@ foyer = new function() {
             );
             add_navigation(pid, 'Prob. ' + pid);
             $('#problem-' + pid).click(function() {
-                // $(".page[id='" + pid + "']").show();
-                // $(".page[id!='" + pid + "']").hide();
                 // redirect
                 $('#nav-' + pid).click();
             });
         });
+        add_page('Status');
         add_page('Hacks');
         add_page('Room');
+        add_page('Standings');
         add_page('Friends');
         add_page('Custom Invocation');
 
@@ -396,6 +397,7 @@ foyer = new function() {
 
         fetch.list();
         fetch.submit();
+
         // roll update
         page.hacks();
         page.friends();
