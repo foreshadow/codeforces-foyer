@@ -13,15 +13,24 @@ div#body {
 }
 
 #leftside {
-    margin: 0 26% 0 10%;
+    margin: 0 30% 0 8%;
     padding-right: 2%;
 }
 
 #rightside {
     position: fixed;
-    top: 84px;
-    left: 75%;
-    width: 300px;
+    top: 64px;
+    left: 73%;
+    right: 0;
+    margin-right: 4%;
+}
+
+#rightside hr {
+    margin-right: -18%;
+}
+
+#rightside hr.status-hr {
+    margin-right: initial;
 }
 
 div#vr {
@@ -57,22 +66,23 @@ div#header {
 }
 
 #navigation {
-    padding-top: 40px;
+    padding-top: 30px;
 }
 
 .problem-navigation {
-    float: left;
+    display: inline-block;
+    width: 100%;
     margin-bottom: 6px;
 }
 
 .navigation-title {
     float: left;
-    max-width: 240px;
-    margin-left: 15px;
+    /*max-width: 240px;*/
+    /*margin-left: 15px;*/
 }
 
 .navigation-passed {
-    float: left;
+    float: right;
 }
 
 .timer {
@@ -154,26 +164,27 @@ hr {
 
 #leftbar {
     position: fixed;
-    left: 0;
-    max-width: 7%;
-    margin-top: 85px;
+    top: 40px;
+    left: 421px;
+    right: 4%;
+    z-index: 1030;
 }
 
 #leftbar div {
-    margin: 9px 0;
-    padding: 6px;
+    float: left;
+    padding: 3px;
+    margin: 0 6px;
     font-weight: bold;
-    text-align: left;
     cursor: pointer;
 }
 
 #leftbar div.primary {
-    border-radius: 0 10px 10px 0;
+    border-radius: 3px;
     background-color: #ccc;
 }
 
 .page {
-    margin-top: 90px;
+    margin-top: 70px;
 }
 
 table.table thead tr th {

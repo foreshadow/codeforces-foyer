@@ -111,10 +111,10 @@ foyer = new function() {
                     var retry = false;
                     var st = '';
                     $.each(data.result, function(k, s) {
-                        if (s.problem.contestId == cid) {
+                        if (s.problem.contestId == cid && st == '') {
                             var pid = s.problem.index;
                             if (pid != lastpid) {
-                                st += '<hr></div><div class="pname inline">' + pid + '. ' + s.problem.name + '</div>';
+                                st += '<hr class="status-hr"></div><div class="pname inline">' + pid + '. ' + s.problem.name + '</div>';
                             }
                             st +=
                                 '<div class="verdict ' + codeforces.verdict_class(s.verdict) + '">' +
@@ -135,13 +135,7 @@ foyer = new function() {
                             retry = true;
                         }
                     });
-                    st += '<hr>';
                     $('#st').html(st);
-                    // $('#st .verdict').hover(function() {
-                    //     $(this).next().css('display', 'flex');
-                    // }, function() {
-                    //     $(this).next().fadeOut();
-                    // });
                     $('#st-title').css('cursor', 'default');
                     $('#loading').fadeOut();
                     if (retry) {
@@ -161,7 +155,7 @@ foyer = new function() {
                 $.each($html.find("a[title='Participants solved the problem']"), function(k, v) {
                     var pid = $(this).parent().html().match(/status\/(\w)/)[1];
                     var passed = $(this).html().replace(/.*&nbsp;x/, '');
-                    $('#passed-' + pid).html('(' + passed + ')');
+                    $('#passed-' + pid).html(passed);
                 });
                 $html.find('a').attr('href', '#');
                 $('.page#overview').html($html.find('#pageContent'));
@@ -183,8 +177,9 @@ foyer = new function() {
                     return;
                 }
                 handle = $submit.find('.lang-chooser').children().first().next().find('a').first().html();
+                $submit.find('.second-level-menu').next().css('padding-top', 9);
                 $submit.find('.second-level-menu').next().css('padding-bottom', 0);
-                $submit.find('form').prev().html('Your handle: ' + handle);
+                $('#leftbar').prepend('<span style="float: right;">' + handle + '</span>');
                 $submit.find('form.submit-form').attr('action',
                     'submit' + $submit.find('form.submit-form').attr('action')
                 );
@@ -257,6 +252,20 @@ foyer = new function() {
         setTimeout(timer, 1000);
     };
     var page = {
+        status: function() {
+            $.get('http://codeforces.com/contest/' + cid + '/my', function(data) {
+                var $status = $('<div></div>').append(data);
+                $status.find('#pageContent').attr('class', '');
+                $status.find('a').attr('href', '#');
+                $status.find('div.second-level-menu').hide();
+                $('#status').html($status.find('#pageContent'));
+            });
+            if ($('#nav-friends').attr('class') == 'primary') {
+                setTimeout(page.status, 1000);
+            } else {
+                setTimeout(page.status, 5000);
+            }
+        },
         friends: function() {
             $.get('http://codeforces.com/contest/' + cid + '/standings/friends/true', function(data) {
                 var $standings = $('<div></div>').append(data);
@@ -335,7 +344,6 @@ foyer = new function() {
         $('#body').prepend('<div id="leftbar"></div>');
         $('#header').css('position', 'fixed');
         $('#header').next().attr('id', 'title');
-        $('#header').children().first().after('<div id="navigation"></div>');
         $('#header').append('<hr>');
         $('#title').css('text-align', 'left');
         $('#title').css('top', '15px');
@@ -344,12 +352,13 @@ foyer = new function() {
             '<div class="inline">' + $('.caption').html() + '</div>'
         );
         $('.caption').next().remove();
-        $('#rightside').append('<div id="submit"></div>');
-        $('#submit').after('<ul id="status"></ul>');
+        $('#rightside').append('<div id="navigation" style="margin-left: 30px;"></div><hr>');
+        $('#rightside').append('<div id="submit" style="margin-left: 30px;"></div><hr>');
+        $('#rightside').append('<ul id="status" style="margin-left: 30px;"></ul>'/* + '<hr>'*/);
         $('#status').append(
             '<link href="http://st.codeforces.com/s/19764/css/status.css" rel="stylesheet">' +
             '<div id="st-title" style="text-align: center; font-weight: bold; cursor: default;">' +
-            '<hr>My Submissions<span id="loading"> (Refreshing)</span></div>' +
+            'My Last Submission<span id="loading"> (Refreshing)</span></div>' +
             '<div id="st" style="cursor: default;"></div>'
         );
         $(".problemindexholder").parent().attr('class', 'page');
@@ -373,12 +382,11 @@ foyer = new function() {
             var title = $(".problemindexholder[problemindex='" + pid + "'] .title").html();
             $('#navigation').append(
                 '<div class="problem-navigation">' +
-                '<div class="navigation-title inline"><a id="problem-' + pid + '" href="#">' + title + '</a></div>' +
+                '<div class="navigation-title"><a id="problem-' + pid + '" href="#">' + title + '</a></div>' +
                 '<div id="passed-' + pid + '" class="navigation-passed"></div></div>'
             );
-            add_navigation(pid, 'Prob. ' + pid);
+            add_navigation(pid, pid);
             $('#problem-' + pid).click(function() {
-                // redirect
                 $('#nav-' + pid).click();
             });
         });
@@ -399,6 +407,7 @@ foyer = new function() {
         fetch.submit();
 
         // roll update
+        page.status();
         page.hacks();
         page.friends();
         fetch.status();
