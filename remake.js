@@ -106,27 +106,27 @@ foyer = new function() {
             $('#st-title').css('cursor', 'wait');
             $('#loading').fadeIn();
             if (typeof handle != 'undefined') {
-                $.get('http://codeforces.com/api/user.status?handle=' + handle + '&from=1&count=100', function(data) {
+                $.get('http://codeforces.com/api/user.status?handle=' + handle + '&from=1&count=10', function(data) {
                     var lastpid;
                     var retry = false;
                     var st = '';
                     $.each(data.result, function(k, s) {
-                        if (s.problem.contestId == cid && st == '') {
+                        if (s.problem.contestId == cid) { // && st == ''
                             var pid = s.problem.index;
                             if (pid != lastpid) {
                                 st += '<hr class="status-hr"></div><div class="pname inline">' + pid + '. ' + s.problem.name + '</div>';
                             }
                             st +=
                                 '<div class="verdict ' + codeforces.verdict_class(s.verdict) + '">' +
-                                    '<span>' +  
+                                    '<span>' +
                                         codeforces.verdict(s.verdict, s.passedTestCount, s.testset) +
-                                    '</span>' + 
+                                    '</span>' +
                                     '<div class="stime">' + stime(s.relativeTimeSeconds, s.creationTimeSeconds) + '</div>' +
-                                '</div>' + 
+                                '</div>' +
                                 '<div class="verdict-detail gray" style="display: flex;">' +
                                     '<div style="width: 25%; float: left;">' + s.timeConsumedMillis + 'ms' + '</div>' +
                                     '<div style="width: 30%; float: left;">' + s.memoryConsumedBytes / 1024 + 'KB' + '</div>' +
-                                    '<div style="width: 45%; float: left; text-align: right;">' + s.programmingLanguage + '</div>' +  
+                                    '<div style="width: 45%; float: left; text-align: right;">' + s.programmingLanguage + '</div>' +
                                 '</div>'
                             lastpid = pid;
                         }
@@ -167,7 +167,7 @@ foyer = new function() {
                 setTimeout(fetch.passed, 1000);
             } else {
                 setTimeout(fetch.passed, 5000);
-            } 
+            }
         },
         submit: function() {
             $.get('http://codeforces.com/contest/' + cid + '/submit', function(data) {
@@ -184,14 +184,16 @@ foyer = new function() {
                     'submit' + $submit.find('form.submit-form').attr('action')
                 );
                 $submit.find('div.second-level-menu').hide();
+                $submit.find('div.second-level-menu').next().next().hide();
                 $submit.find('td.field-name').hide();
                 $submit.find('tr.subscription-row td').first().hide();
                 $submit.find('#editor').css('height', 60);
                 $submit.find('textarea#sourceCodeTextarea').css('height', 60);
                 $submit.find('td.aceEditorTd input').hide();
                 $submit.find('td.aceEditorTd label').hide();
-                $submit.find("td:contains('Be careful')").children().css('height', 30);
-                $submit.find("td:contains('Be careful')").children().css('overflow-y', 'scroll');
+                // $submit.find("td:contains('Be careful')").children().css('height', 30);
+                // $submit.find("td:contains('Be careful')").children().css('overflow-y', 'scroll');
+                $submit.find("td:contains('Be careful')").parent().hide();
                 $submit.find('td[colspan=2]').attr('colspan', 1);
                 $submit.find('#pageContent script').first().remove();
                 $submit.find('#pageContent script').first().html(
@@ -242,7 +244,7 @@ foyer = new function() {
     var timer = function() {
         var now = Date.parse(new Date()) / 1000;
         var display;
-        if (typeof cst == "undefined" || typeof cdt == "undefined" || 
+        if (typeof cst == "undefined" || typeof cdt == "undefined" ||
             now >= cst + cdt || $('#contest-status').html() == 'Finished') {
             display = stime(2147483647, now);
         } else {
@@ -288,7 +290,7 @@ foyer = new function() {
                 $.each(data.result, function(k, v) {
                     var line = '<tr>'+ '<td>' + this.id + '</td>';
                     if (typeof cst != 'undefined') {
-                        line += '<td>' + stime(this.creationTimeSeconds - cst, this.creationTimeSeconds) + '</td>' 
+                        line += '<td>' + stime(this.creationTimeSeconds - cst, this.creationTimeSeconds) + '</td>'
                     } else {
                         line += '<td>' + stime(2147483647, this.creationTimeSeconds) + '</td>'
                     }
@@ -296,17 +298,17 @@ foyer = new function() {
                         '<td style="max-width: 120px;" class="inline">' + this.hacker.members[0].handle + '</td>' +
                         '<td style="max-width: 120px;" class="inline">' + this.defender.members[0].handle + '</td>' +
                         '<td style="max-width: 240px;" class="inline">' + this.problem.index + '. ' +  this.problem.name + '</td>' +
-                        '<td class="' + codeforces.verdict_class(this.verdict) + '">' + codeforces.verdict(this.verdict) + '</td>' + 
+                        '<td class="' + codeforces.verdict_class(this.verdict) + '">' + codeforces.verdict(this.verdict) + '</td>' +
                         '</tr>';
                     html = line + html;
                 });
-                html = '<table class="table table-hover table-striped table-condensed"><thead><tr>' + 
+                html = '<table class="table table-hover table-striped table-condensed"><thead><tr>' +
                     '<th>#</th>' +
-                    '<th>When</th>' + 
-                    '<th style="max-width: 120px;">Hacker</th>' + 
-                    '<th style="max-width: 120px;">Defender</th>' + 
-                    '<th style="max-width: 240px;">Problem</th>' + 
-                    '<th>Verdict</th>' +  
+                    '<th>When</th>' +
+                    '<th style="max-width: 120px;">Hacker</th>' +
+                    '<th style="max-width: 120px;">Defender</th>' +
+                    '<th style="max-width: 240px;">Problem</th>' +
+                    '<th>Verdict</th>' +
                     '</tr></thead><tbody>' + html;
                 $('#hacks').html(html);
             });
@@ -348,9 +350,11 @@ foyer = new function() {
         $('#title').css('text-align', 'left');
         $('#title').css('top', '15px');
         $('.caption').html(
-            '<span class="timer">&nbsp;&nbsp;<span id="contest-status"></span>&nbsp;&nbsp;<span id="time"></span></span>' + 
-            '<div class="inline">' + $('.caption').html() + '</div>'
+            '<span class="timer">&nbsp;&nbsp;<span id="contest-status"></span>&nbsp;&nbsp;<span id="time"></span></span>' +
+            '<div class="inline"><a href="http://codeforces.com/contest/' + cid + '">' + $('.caption').html() + '</a></div>'
         );
+        $('.caption a').css('text-decoration', 'none');
+        $('.caption a').css('color', 'inherit');
         $('.caption').next().remove();
         $('#rightside').append('<div id="navigation" style="margin-left: 30px;"></div><hr>');
         $('#rightside').append('<div id="submit" style="margin-left: 30px;"></div><hr>');
@@ -362,7 +366,7 @@ foyer = new function() {
             '<div id="st" style="cursor: default;"></div>'
         );
         $(".problemindexholder").parent().attr('class', 'page');
-        
+
         add_page('Overview');
         $.each($('.problemindexholder'), function(k, v) {
             if ($(this).find('.time-limit').html().replace(/.*?<\/div>/, '') != '1 second') {
