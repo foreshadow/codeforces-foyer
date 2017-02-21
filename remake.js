@@ -382,7 +382,7 @@ foyer = new function() {
             var title = $(".problemindexholder[problemindex='" + pid + "'] .title").html();
             $('#navigation').append(
                 '<div class="problem-navigation">' +
-                '<div class="navigation-title"><a id="problem-' + pid + '" href="#">' + title + '</a></div>' +
+                '<div class="navigation-title inline"><a id="problem-' + pid + '" href="#">' + title + '</a></div>' +
                 '<div id="passed-' + pid + '" class="navigation-passed"></div></div>'
             );
             add_navigation(pid, pid);

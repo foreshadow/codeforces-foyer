@@ -77,7 +77,7 @@ div#header {
 
 .navigation-title {
     float: left;
-    /*max-width: 240px;*/
+    max-width: 240px;
     /*margin-left: 15px;*/
 }
 
