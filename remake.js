@@ -111,7 +111,7 @@ foyer = new function() {
                     var retry = false;
                     var st = '';
                     $.each(data.result, function(k, s) {
-                        if (s.problem.contestId == cid) { // && st == ''
+                        if (s.problem.contestId == cid) { // && st == '' pop
                             var pid = s.problem.index;
                             if (pid != lastpid) {
                                 st += '<hr class="status-hr"></div><div class="pname inline">' + pid + '. ' + s.problem.name + '</div>';
